@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pingala-shodhana"
+version = "1.0.0"
+description = "Sanskrit metre identification, anomaly diagnosis, metre repair (Chando-Sahāyaka) and lakṣaṇa reading (Lakṣaṇa-Yantra)"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [{name = "Dr Sathyam Bolli"}]
+keywords = ["sanskrit", "chandas", "prosody", "metre", "computational-linguistics"]
+classifiers = ["Programming Language :: Python :: 3", "License :: OSI Approved :: MIT License", "Natural Language :: Sanskrit"]
+
+[project.scripts]
+pingala = "pingala_shodhana.cli:main"
+
+[tool.setuptools]
+packages = ["pingala_shodhana"]
+
+[tool.setuptools.package-data]
+pingala_shodhana = ["data/*.json"]

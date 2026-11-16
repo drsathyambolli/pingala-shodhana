@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piṅgala-Śodhana</title>
+<meta name="description" content="Piṅgala-Śodhana: Sanskrit metre identification, anomaly diagnosis, chanting, metre repair (Chando-Sahāyaka) and lakṣaṇa reading (Lakṣaṇa-Yantra).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Tiro+Devanagari+Sanskrit:ital@0;1&family=Noto+Serif+Telugu&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app/css/app.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="dev">पिङ्गल-शोधनम्</span><span class="lat">Piṅgala-Śodhana</span></div>
+    <p class="tagline">Scan a Sanskrit verse, identify its metre among <b id="metre-count">100</b> metres, see why it deviates, hear it chanted, repair it, and read metre definitions straight from the śāstra.</p>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#sodhana" data-view="sodhana"><span class="d">शोधनम्</span>Scan &amp; diagnose</a>
+      <a href="#sahayaka" data-view="sahayaka"><span class="d">सहायकः</span>Repair</a>
+      <a href="#laksana" data-view="laksana"><span class="d">लक्षणयन्त्रम्</span>Lakṣaṇa-Yantra</a>
+      <a href="#kosa" data-view="kosa"><span class="d">छन्दःकोशः</span>Metres</a>
+      <a href="#about" data-view="about"><span class="d">परिचयः</span>About</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 1. Śodhana -->
+    <section class="view" id="view-sodhana">
+      <div class="card input-card">
+        <label class="lbl" for="verse">Verse</label>
+        <textarea id="verse" spellcheck="false" placeholder="या कुन्देन्दुतुषारहारधवला या शुभ्रवस्त्रावृता …"></textarea>
+        <div class="controls">
+          <select id="samples" aria-label="Load a sample verse"></select>
+          <label class="row small-note" for="script">Show in
+            <select id="script">
+              <option value="deva">देवनागरी</option><option value="iast">IAST</option><option value="telugu">తెలుగు</option>
+            </select></label>
+          <button class="btn" id="copy">Copy scansion</button>
+          <button class="btn" id="to-repair">Repair this verse</button>
+          <button class="btn" id="clear">Clear</button>
+          <span class="toast" id="toast" role="status"></span>
+        </div>
+        <p class="hint">Type or paste in Devanagari, IAST or Telugu script. End pādas or half-verses with । ॥ or a new line. Keep the sandhi as written (saṃhitā): weights are counted across word boundaries.</p>
+      </div>
+      <div class="card input-card" id="patha">
+        <div class="row" style="justify-content:space-between"><h3>Pāṭha · chant with a real recording</h3><span class="small-note" id="p-status" role="status"></span></div>
+        <p class="hint">Record yourself or a teacher chanting this verse, or load an audio file. The app lines the recording up with the scansion and lights each akṣara as it is sung. Or press Recite along and chant: the highlight follows your voice.</p>
+        <div class="controls">
+          <button class="btn" id="p-rec">● Record</button>
+          <label class="btn" for="p-file">Load audio…</label><input type="file" id="p-file" accept="audio/*" hidden>
+          <button class="btn primary" id="p-play" disabled>▶ Play with highlighting</button>
+          <label class="row small-note" for="p-rate">Speed <select id="p-rate"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option></select></label>
+          <button class="btn" id="p-tap" disabled>Tap to sync</button>
+          <button class="btn" id="p-follow">Recite along</button>
+          <button class="btn" id="p-export" disabled>Copy timings</button>
+        </div>
+      </div>
+      <div id="result" aria-live="polite"></div>
+    </section>
+
+    <!-- 2. Sahāyaka -->
+    <section class="view" id="view-sahayaka" hidden>
+      <div class="card input-card">
+        <div><h3>Chando-Sahāyaka · छन्दःसहायकः</h3><p class="hint">For composers. Write words separated by spaces, one half-verse or pāda per line. The assistant tries kośa synonyms (same liṅga and ending), filler particles (च हि तु एव अपि वै खलु) and word reordering, rescans every candidate and keeps the edits that bring the verse closer to the metre.</p></div>
+        <label class="lbl" for="s-verse">Draft verse</label>
+        <textarea id="s-verse" spellcheck="false"></textarea>
+        <div class="controls">
+          <label class="row small-note" for="s-metre">Target metre <select id="s-metre"></select></label>
+          <label class="row small-note" for="s-reorder"><input type="checkbox" id="s-reorder" checked> try word reordering</label>
+          <button class="btn primary" id="s-run">Find repairs</button>
+          <span class="toast" id="s-status" role="status"></span>
+        </div>
+      </div>
+      <div id="s-result"></div>
+    </section>
+
+    <!-- 3. Lakṣaṇa-Yantra -->
+    <section class="view" id="view-laksana" hidden>
+      <div class="card input-card">
+        <div><h3>Lakṣaṇa-Yantra · लक्षणयन्त्रम्</h3><p class="hint">Paste a lakṣaṇa verse (for example from the Vṛttaratnākara). The Yantra reads the gaṇa words (म्भौ नतौ ताद्गुरू …) and the number words for yati (जलधि-षड्-अगैः = 4 · 6 · 7), scans the verse itself, and accepts the metre only when the definition and the verse agree, because a lakṣaṇa is composed in the metre it defines.</p></div>
+        <label class="lbl" for="l-text">Lakṣaṇa</label>
+        <textarea id="l-text" spellcheck="false"></textarea>
+        <div class="controls">
+          <input type="text" id="l-name" placeholder="Metre name (optional, Devanagari)" aria-label="Metre name">
+          <select id="l-samples" aria-label="Load a lakṣaṇa"></select>
+          <button class="btn primary" id="l-run">Read lakṣaṇa</button>
+        </div>
+      </div>
+      <div id="l-result"></div>
+      <div class="card"><div class="row" style="justify-content:space-between"><h3>Evaluation on the bundled lakṣaṇas</h3><button class="btn small" id="l-eval">Run evaluation</button></div><div id="l-eval-out" class="scroll small-note">Runs the Yantra on every core lakṣaṇa and compares its reading with the known gaṇa formula and yati.</div></div>
+    </section>
+
+    <!-- 4. Kośa -->
+    <section class="view" id="view-kosa" hidden>
+      <div class="lib-tools">
+        <input id="q" type="search" placeholder="Search by name, gaṇa (म स ज), pattern (GGLGGLLGLGG) or akṣara count" aria-label="Search metres">
+        <select id="f-kind" aria-label="Metre type"><option value="">All types</option><option value="sama">Samavṛtta</option><option value="ardha">Ardhasamavṛtta</option><option value="visama">Viṣamavṛtta</option><option value="jati">Jāti (mātrā)</option><option value="special">Śloka &amp; Upajāti</option><option value="vedic">Vedic (Piṅgala)</option></select>
+        <select id="f-len" aria-label="Akṣaras per pāda"><option value="">Any length</option></select>
+        <select id="f-src" aria-label="Source"><option value="">All sources</option><option value="core">With lakṣaṇa verse</option><option value="std">Standard list</option><option value="user">Added by me</option></select>
+      </div>
+      <p class="small-note" id="lib-count"></p>
+      <div class="lib" id="lib"></div>
+      <div class="row" style="justify-content:center"><button class="btn" id="lib-more" hidden>Show more</button></div>
+    </section>
+
+    <!-- 5. About -->
+    <section class="view" id="view-about" hidden>
+      <div class="card prose" id="about-body"></div>
+    </section>
+  </main>
+  <footer>Piṅgala-Śodhana · Dr Sathyam Bolli · Team PINGALA, PGDSCL · open source (MIT). Chant is a synthesised rhythm guide.</footer>
+</div>
+
+<div class="player" role="region" aria-label="Chant player">
+  <div class="wrap">
+    <button class="play" id="play" aria-label="Chant the verse"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></button>
+    <div class="now-box"><div class="now-ak" id="now-ak">–</div><div class="now-meta" id="now-meta">Press play to chant. Guru akṣaras last two mātrās, laghu one.</div></div>
+    <details class="settings-d" id="settings-d"><summary>Tempo, pitch &amp; drone</summary>
+      <div class="settings">
+        <label for="cmode">Chant <select id="cmode"><option value="voice">Recite with voice</option><option value="hum">Rhythm hum</option></select></label>
+        <label for="voice">Voice <select id="voice"><option value="">Loading voices…</option></select></label>
+        <label for="tempo">Tempo <input id="tempo" type="range" min="0.16" max="0.5" step="0.01" value="0.3"></label>
+        <label for="sa">Sa <select id="sa">
+          <option value="130.81">C</option><option value="138.59">C♯</option><option value="146.83" selected>D</option><option value="155.56">D♯</option><option value="164.81">E</option>
+          <option value="174.61">F</option><option value="196.00">G</option><option value="220.00">A</option><option value="233.08">A♯</option><option value="246.94">B</option></select></label>
+        <label for="drone"><input id="drone" type="checkbox" checked> Tanpura drone</label>
+        <label for="clicks"><input id="clicks" type="checkbox"> Mātrā clicks</label>
+      </div>
+    </details>
+  </div>
+</div>
+
+<script src="data/metres.js"></script>
+<script src="app/js/engine.js"></script>
+<script src="app/js/laksana.js"></script>
+<script src="app/js/sahayaka.js"></script>
+<script src="app/js/chant.js"></script>
+<script src="app/js/patha.js"></script>
+<script src="app/js/app.js"></script>
+</body>
+</html>
